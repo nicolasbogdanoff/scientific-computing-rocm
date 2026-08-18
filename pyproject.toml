@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scientific-computing-rocm"
+version = "0.1.0"
+description = "Reproducible backend diagnostics for scientific computing experiments."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "Nicolas Mauricio Bogdanoff"}]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+torch = ["torch>=2.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["scientific_computing_rocm*"]

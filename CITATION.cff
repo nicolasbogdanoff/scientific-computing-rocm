@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Scientific Computing ROCm Diagnostics"
+type: software
+version: 0.1.0
+authors:
+  - family-names: Bogdanoff
+    given-names: Nicolás Mauricio
+    orcid: https://orcid.org/0009-0004-6275-3013
+abstract: >
+  Conservative backend diagnostics for reproducible scientific-computing
+  experiments with optional PyTorch ROCm, CUDA, and CPU execution.
+repository-code: https://github.com/nicolasbogdanoff/scientific-computing-rocm
