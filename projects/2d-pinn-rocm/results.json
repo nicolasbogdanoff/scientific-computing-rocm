@@ -1,0 +1,39 @@
+{
+  "experiment": "2d_transient_heat_equation_pinn",
+  "platform": "AMD University Program Learning Cloud Dublin",
+  "device": "AMD Radeon 890M Graphics",
+  "torch_version": "2.9.1+rocm7.13.0",
+  "hip_version": "7.13.99004-3309c6114a",
+  "alpha": 0.1,
+  "domain": {
+    "x": [0.0, 1.0],
+    "y": [0.0, 1.0],
+    "t": [0.0, 0.5]
+  },
+  "initial_training": {
+    "steps": 1400,
+    "interior_points": 8000,
+    "elapsed_seconds": 43.56,
+    "rmse": 0.01872088387608528,
+    "mae": 0.016418753191828728,
+    "max_abs_error": 0.10096903890371323
+  },
+  "refined_training": {
+    "additional_steps": 1600,
+    "interior_points": 8000,
+    "elapsed_seconds": 49.33,
+    "total_elapsed_seconds": 92.89,
+    "rmse": 0.0034329588524997234,
+    "mae": 0.002637546043843031,
+    "max_abs_error": 0.020551202818751335,
+    "evaluation_points": 38400,
+    "rmse_reduction_fraction": 0.8165846835
+  },
+  "residual_step_benchmark": [
+    {"interior_points": 1000, "mean_seconds": 0.0018572956672869624, "approx_points_per_second": 538417},
+    {"interior_points": 4000, "mean_seconds": 0.0019731524317952182, "approx_points_per_second": 2027213},
+    {"interior_points": 8000, "mean_seconds": 0.008596560232399497, "approx_points_per_second": 930605}
+  ],
+  "interpretation": "Controlled synthetic experiment with analytical validation; suitable for teaching and proof-of-concept ROCm research, not a production multi-GPU benchmark."
+}
+
