@@ -3,18 +3,26 @@
 from __future__ import annotations
 
 import importlib.util
+import platform
 
 
 def backend_report() -> dict[str, object]:
     """Return a serializable report of the locally discoverable backend."""
     if importlib.util.find_spec("torch") is None:
-        return {"torch_installed": False, "backend": "cpu", "accelerator": None}
+        return {
+            "python_version": platform.python_version(),
+            "torch_installed": False,
+            "backend": "cpu",
+            "accelerator": None,
+        }
     import torch
 
     hip_version = getattr(getattr(torch, "version", None), "hip", None)
     cuda_available = bool(torch.cuda.is_available())
     return {
+        "python_version": platform.python_version(),
         "torch_installed": True,
+        "torch_version": torch.__version__,
         "backend": "rocm" if hip_version else ("cuda" if cuda_available else "cpu"),
         "accelerator": hip_version or ("cuda" if cuda_available else None),
         "device_count": int(torch.cuda.device_count()) if cuda_available else 0,

@@ -7,6 +7,7 @@ A small, honest foundation for future AI/ML and accelerated scientific-computing
 - Detects whether PyTorch is installed.
 - Distinguishes a reported ROCm/HIP runtime from CUDA and CPU fallback.
 - Reports accelerator visibility and device count when PyTorch exposes them.
+- Records Python and PyTorch versions when available, supporting reproducible experiment logs.
 - Selects `cuda` only when `torch.cuda.is_available()` is true; otherwise it selects CPU.
 
 ROCm-enabled PyTorch uses the CUDA-compatible device API, so the code intentionally uses the portable `cuda` device string while the report records the HIP version when available.
