@@ -30,6 +30,10 @@ python -m pip install -e '.[test,torch]'
 
 The package does not install ROCm or PyTorch automatically. Hardware, drivers, and framework wheels must be selected for the host system and documented in the experiment record.
 
+## Research track: 2D heat-equation PINN
+
+The repository also contains a separate **draft experiment** for a physics-informed neural network (PINN) applied to the 2D heat equation. The implementation, environment notes, and result record are kept on [draft PR #1](https://github.com/nicolasbogdanoff/scientific-computing-rocm/pull/1); they are intentionally not part of the conservative diagnostics API on `main`. Results in that experiment are branch-specific and should be interpreted together with its documented hardware and software context.
+
 ## Research direction
 
 Future additions can benchmark matrix multiplication, compare numerical tolerances, and record environment metadata. Any performance result should include hardware, software versions, tensor shapes, warm-up policy, and repetitions.
