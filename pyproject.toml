@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scientific-computing-rocm"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reproducible backend diagnostics for scientific computing experiments."
 readme = "README.md"
 requires-python = ">=3.10"
