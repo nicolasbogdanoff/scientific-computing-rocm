@@ -30,7 +30,9 @@ Use a ROCm-enabled PyTorch installation appropriate for the host. ROCm PyTorch e
 python pinn_2d_heat_equation.py --steps 3000 --interior-points 8000
 ```
 
-The script reports the selected device and writes `pinn_2d_results.json`. On a CPU-only host it remains runnable, but the experiment is intended for an AMD GPU.
+The script reports the selected device and writes `pinn_2d_results.json`. The seed, architecture, diffusion coefficient, learning rate, and evaluation resolution are recorded in that file. On a CPU-only host it remains runnable, but the experiment is intended for an AMD GPU.
+
+Useful controls include `--seed`, `--alpha`, `--width`, `--hidden-layers`, `--learning-rate`, and `--resolution`. Invalid non-positive values fail before training starts.
 
 ## Reported AMD run
 
@@ -45,11 +47,21 @@ The script reports the selected device and writes `pinn_2d_results.json`. On a C
 | Refined max absolute error | 0.0205512028 |
 | Total optimization time | 92.89 s |
 
-The refinement reduced RMSE by approximately 81.7%. A separate residual benchmark measured 1,000, 4,000, and 8,000 interior points to illustrate higher-order automatic-differentiation scaling.
+The committed `results.json` is the record of a two-stage refined run; the command above performs one configurable run and emits a single-run metrics record. The refinement reduced RMSE by approximately 81.7%. A separate residual benchmark measured 1,000, 4,000, and 8,000 interior points to illustrate higher-order automatic-differentiation scaling.
 
 ## Scope and limitations
 
 This is a controlled synthetic problem with a known analytical solution. It demonstrates ROCm/PyTorch execution, automatic differentiation, validation, and reproducible reporting; it is not a production thermal model or a claim of multi-GPU performance. The original run used a fixed seed and saved metrics as JSON.
+
+The result is a measured experiment record, not a guarantee that every host will reproduce the same elapsed time or final error. Re-run the script on the target environment and preserve the generated JSON together with the Python, PyTorch, HIP, device, seed, and architecture metadata.
+
+## Repository checks
+
+The root CI checks the project-level Python syntax in addition to the diagnostics package tests. A local syntax check is:
+
+```bash
+python -m py_compile projects/2d-pinn-rocm/pinn_2d_heat_equation.py
+```
 
 ## Citation and provenance
 

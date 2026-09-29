@@ -14,3 +14,4 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install -e '.[test]'
       - run: pytest -q
+      - run: python -m py_compile projects/2d-pinn-rocm/pinn_2d_heat_equation.py

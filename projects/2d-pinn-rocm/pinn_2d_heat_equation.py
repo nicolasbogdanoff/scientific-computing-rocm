@@ -19,10 +19,16 @@ from torch import nn
 
 @dataclass
 class Metrics:
+    experiment: str
     device: str
     device_name: str
     torch_version: str
     hip_version: str | None
+    alpha: float
+    seed: int
+    width: int
+    hidden_layers: int
+    evaluation_resolution: int
     steps: int
     interior_points: int
     elapsed_seconds: float
@@ -49,6 +55,13 @@ def exact_solution(points: torch.Tensor, alpha: float) -> torch.Tensor:
     return torch.exp(-2 * math.pi**2 * alpha * t) * torch.sin(math.pi * x) * torch.sin(math.pi * y)
 
 
+def set_seed(seed: int) -> None:
+    """Set the random seeds used by CPU and accelerator sampling."""
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
 def derivatives(model: nn.Module, points: torch.Tensor, alpha: float) -> torch.Tensor:
     points = points.detach().clone().requires_grad_(True)
     prediction = model(points)
@@ -73,8 +86,15 @@ def sample_boundary(n: int, device: torch.device) -> torch.Tensor:
     return points
 
 
-def train(model: PINN, device: torch.device, steps: int, n_interior: int, alpha: float) -> float:
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+def train(
+    model: PINN,
+    device: torch.device,
+    steps: int,
+    n_interior: int,
+    alpha: float,
+    learning_rate: float,
+) -> float:
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     started = time.perf_counter()
     for _ in range(steps):
         interior = sample_interior(n_interior, device)
@@ -96,7 +116,12 @@ def train(model: PINN, device: torch.device, steps: int, n_interior: int, alpha:
 
 
 @torch.no_grad()
-def evaluate(model: PINN, device: torch.device, alpha: float, resolution: int = 32) -> tuple[float, float, float]:
+def evaluate(
+    model: PINN,
+    device: torch.device,
+    alpha: float,
+    resolution: int = 32,
+) -> tuple[float, float, float]:
     axis = torch.linspace(0.0, 1.0, resolution, device=device)
     grid_x, grid_y, grid_t = torch.meshgrid(axis, axis, axis, indexing="ij")
     points = torch.stack((grid_x.flatten(), grid_y.flatten(), grid_t.flatten()), dim=1)
@@ -109,22 +134,46 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=3000)
     parser.add_argument("--interior-points", type=int, default=8000)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--alpha", type=float, default=0.10)
+    parser.add_argument("--width", type=int, default=64)
+    parser.add_argument("--hidden-layers", type=int, default=4)
+    parser.add_argument("--learning-rate", type=float, default=1e-3)
+    parser.add_argument("--resolution", type=int, default=32)
     parser.add_argument("--output", type=Path, default=Path("pinn_2d_results.json"))
     args = parser.parse_args()
 
-    torch.manual_seed(args.seed)
+    if args.steps < 1 or args.interior_points < 1 or args.resolution < 2:
+        parser.error("steps, interior-points y resolution deben ser positivos; resolution >= 2")
+    if args.width < 1 or args.hidden_layers < 1 or args.learning_rate <= 0:
+        parser.error("width, hidden-layers y learning-rate deben ser positivos")
+    if args.alpha <= 0:
+        parser.error("alpha debe ser positiva")
+
+    set_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device_name = torch.cuda.get_device_name(0) if device.type == "cuda" else "CPU"
-    alpha = 0.10
-    model = PINN().to(device)
-    elapsed = train(model, device, args.steps, args.interior_points, alpha)
-    rmse, mae, max_abs_error = evaluate(model, device, alpha)
+    model = PINN(width=args.width, hidden_layers=args.hidden_layers).to(device)
+    elapsed = train(
+        model,
+        device,
+        args.steps,
+        args.interior_points,
+        args.alpha,
+        args.learning_rate,
+    )
+    rmse, mae, max_abs_error = evaluate(model, device, args.alpha, args.resolution)
 
     metrics = Metrics(
+        experiment="2d_transient_heat_equation_pinn",
         device=str(device),
         device_name=device_name,
         torch_version=torch.__version__,
         hip_version=getattr(torch.version, "hip", None),
+        alpha=args.alpha,
+        seed=args.seed,
+        width=args.width,
+        hidden_layers=args.hidden_layers,
+        evaluation_resolution=args.resolution,
         steps=args.steps,
         interior_points=args.interior_points,
         elapsed_seconds=elapsed,
